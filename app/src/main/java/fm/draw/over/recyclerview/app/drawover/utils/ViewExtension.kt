@@ -1,9 +1,15 @@
 package fm.draw.over.recyclerview.app.drawover.utils
 
 import android.app.Activity
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.PointF
 import android.graphics.Rect
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.MotionEvent
+import android.view.PixelCopy
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.ColorRes
@@ -43,10 +49,32 @@ internal fun findDrawOverViewAtPosition(parent: View, x: Float, y: Float): DrawO
     } else {
         val rect = parent.getGlobalVisibleRect()
         return if (rect.contains(x.toInt(), y.toInt())) {
-            parent as DrawOverView
+            parent as? DrawOverView
         } else {
             null
         }
     }
 }
 
+// https://stackoverflow.com/questions/58314397/java-lang-illegalstateexception-software-rendering-doesnt-support-hardware-bit
+internal fun View.createBitmap(bitmapCallback: (Bitmap) -> Unit) {
+    val window = getActivity()?.window ?: return
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // Above Android O, use PixelCopy
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val dest = getGlobalVisibleRect()
+        val onPixelCopyFinished: (Int) -> Unit = {
+            if (it == PixelCopy.SUCCESS) {
+                bitmapCallback.invoke(bitmap)
+            }
+        }
+        val threadListener = Handler(Looper.getMainLooper())
+        PixelCopy.request(window, dest, bitmap, onPixelCopyFinished, threadListener)
+    } else {
+        val tBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        val canvas = Canvas(tBitmap)
+        draw(canvas)
+        canvas.setBitmap(null)
+        bitmapCallback.invoke(tBitmap)
+    }
+}

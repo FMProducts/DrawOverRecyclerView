@@ -11,17 +11,17 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import androidx.core.view.ViewCompat
-import androidx.core.view.drawToBitmap
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import fm.draw.over.recyclerview.app.R
 import fm.draw.over.recyclerview.app.drawover.animation.ColorAnimation
 import fm.draw.over.recyclerview.app.drawover.animation.ReverseAnimation
 import fm.draw.over.recyclerview.app.drawover.utils.ScaleDetector
+import fm.draw.over.recyclerview.app.drawover.utils.createBitmap
 import fm.draw.over.recyclerview.app.drawover.utils.findDrawOverViewAtPosition
 import fm.draw.over.recyclerview.app.drawover.utils.getActivity
-import fm.draw.over.recyclerview.app.drawover.utils.getGlobalVisibleRect
 import fm.draw.over.recyclerview.app.drawover.utils.getColor
+import fm.draw.over.recyclerview.app.drawover.utils.getGlobalVisibleRect
 import fm.draw.over.recyclerview.app.drawover.utils.getPointF
 import fm.draw.over.recyclerview.app.drawover.utils.getStatusBarHeight
 import kotlin.math.max
@@ -118,12 +118,12 @@ class DrawOverRecyclerView : RecyclerView {
         if (isScalingStarted) return
 
         val view = findDrawOverViewAtPosition(rootView, e.rawX, e.rawY)
-        if (view != null && ViewCompat.isLaidOut(view)) {
 
+        if (view == null || ViewCompat.isLaidOut(view).not()) return
+        view.createBitmap { bitmap ->
             val offset = calculateOffset()
-
             drawOverImage = DrawOverImage(
-                targetBitmap = view.drawToBitmap(),
+                targetBitmap = bitmap,
                 targetPosition = view.getGlobalVisibleRect(offset),
                 targetView = view,
             )
@@ -173,7 +173,7 @@ class DrawOverRecyclerView : RecyclerView {
         reverseAnimation?.start()
     }
 
-    private fun calculateOffset() : Int {
+    private fun calculateOffset(): Int {
         if (statusBarHeight >= 0) {
             statusBarHeight = getActivity()?.getStatusBarHeight() ?: 0
         }
