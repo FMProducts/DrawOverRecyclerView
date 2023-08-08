@@ -20,12 +20,11 @@ import fm.draw.over.recyclerview.app.drawover.utils.ScaleDetector
 import fm.draw.over.recyclerview.app.drawover.utils.createBitmap
 import fm.draw.over.recyclerview.app.drawover.utils.findDrawOverViewAtPosition
 import fm.draw.over.recyclerview.app.drawover.utils.getActivity
+import fm.draw.over.recyclerview.app.drawover.utils.getAvgPointF
 import fm.draw.over.recyclerview.app.drawover.utils.getColor
 import fm.draw.over.recyclerview.app.drawover.utils.getGlobalVisibleRect
-import fm.draw.over.recyclerview.app.drawover.utils.getPointF
 import fm.draw.over.recyclerview.app.drawover.utils.getStatusBarHeight
 import kotlin.math.max
-import kotlin.math.min
 
 class DrawOverRecyclerView : RecyclerView {
 
@@ -183,8 +182,7 @@ class DrawOverRecyclerView : RecyclerView {
     private fun onDetectScale(detector: ScaleGestureDetector): Boolean {
         drawOverImage?.apply {
             this.scaleFactor *= detector.scaleFactor
-            this.scaleFactor = max(SCALE_FACTOR_MIN, min(scaleFactor, SCALE_FACTOR_MAX))
-
+            this.scaleFactor = max(SCALE_FACTOR_MIN, scaleFactor)
 
             this.scalePivotX = calculateScalePivotX()
             this.scalePivotY = calculateScalePivotY()
@@ -204,9 +202,9 @@ class DrawOverRecyclerView : RecyclerView {
     // region DrawImage Extensions
     private fun DrawOverImage.getTranslatePoint(e: MotionEvent): PointF {
         if (originalTranslatePoint == null) {
-            originalTranslatePoint = e.getPointF()
+            originalTranslatePoint = e.getAvgPointF()
         }
-        currentTranslatePoint = e.getPointF()
+        currentTranslatePoint = e.getAvgPointF()
         return PointF(
             currentTranslatePoint!!.x - originalTranslatePoint!!.x,
             currentTranslatePoint!!.y - originalTranslatePoint!!.y,
@@ -257,7 +255,6 @@ class DrawOverRecyclerView : RecyclerView {
     }
 
     companion object {
-        const val SCALE_FACTOR_MAX = 3.0f
         const val SCALE_FACTOR_MIN = 1.0f
         const val SCALE_POINTER_COUNT = 2
     }

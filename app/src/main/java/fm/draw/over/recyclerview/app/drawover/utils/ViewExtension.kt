@@ -27,7 +27,25 @@ internal fun View.getGlobalVisibleRect(offset: Int = 0): Rect {
 
 internal fun View.getColor(@ColorRes colorRes: Int) = ContextCompat.getColor(context, colorRes)
 
-internal fun MotionEvent.getPointF() = PointF(this.x, this.y)
+internal fun MotionEvent.getAvgPointF(): PointF {
+    val firstPoint = getPointFByIndex(0)
+    val secondPoint = getPointFByIndex(1)
+
+    return PointF(
+        (secondPoint.x + firstPoint.x) / 2,
+        (secondPoint.y + firstPoint.y) / 2,
+    )
+}
+
+internal fun MotionEvent.getPointFByIndex(index: Int): PointF {
+    val pointerId = getPointerId(index)
+    val pointerIndex = findPointerIndex(pointerId)
+
+    return PointF(
+        getX(pointerIndex),
+        getY(pointerIndex)
+    )
+}
 
 internal fun View.getActivity() = context as? Activity
 
