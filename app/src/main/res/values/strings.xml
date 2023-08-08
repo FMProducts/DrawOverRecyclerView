@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DrawOverRecyclerApp</string>
+    <string name="image_description">Image Description</string>
+</resources>
